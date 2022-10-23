@@ -19,14 +19,32 @@
         </div>
     
         <div class="col-md-4 text-center p-4">
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" checked>
-                <label class="form-check-label" for="inlineRadio1"><h4>TIFF Map</h4></label>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+                        <label class="form-check-label" for="inlineRadio1"><h4>TIFF Map</h4></label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+                        <label class="form-check-label" for="inlineRadio2"><h4>GeoTIFF Map</h4></label>
+                    </div>
+                </div>
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
-                <label class="form-check-label" for="inlineRadio2"><h4>GeoTIFF Map</h4></label>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3" checked>
+                        <label class="form-check-label" for="inlineRadio3"><h4>TIFF Map (No Zeros)</h4></label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" value="option4">
+                        <label class="form-check-label" for="inlineRadio4"><h4>GeoTIFF Map (No Zeros)</h4></label>
+                    </div>
+                </div>
             </div>
+            
+            
         </div>
 
         <div class="col-md-4 p-4">
@@ -55,7 +73,7 @@
             //add CSV layer
             .addCSVGridLayer(
                 //data URL
-                "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_data_all.csv",
+                "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_data_all_no_zeros.csv",
                 //resolution, in CRS unit
                 1,
                 //the styles
@@ -90,11 +108,11 @@
                 }
             )
             .setLabelLayer({
-                url: "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_labels_all.csv",
+                url: "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_labels_all_no_zeros.csv",
                 // offsetPix: [10, 10]	
                 style: (lb, zf) => {
                     //select label based on zoom factor
-                    if(zf < 0.02){
+                    if(zf < 0.025){
                         return "bold 1em Arial";
                     }else{
                         return "bold 0em Arial";
@@ -145,6 +163,20 @@
                             },
                         }
                     )
+
+                    app.setLabelLayer({
+                        url: "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_labels_all.csv",
+                        // offsetPix: [10, 10]	
+                        style: (lb, zf) => {
+                            //select label based on zoom factor
+                            if(zf < 0.025){
+                                return "bold 1em Arial";
+                            }else{
+                                return "bold 0em Arial";
+                            }
+                        },
+                    })
+
                 }
                 if ($(this).attr("id") == "inlineRadio2") {
                     app.addCSVGridLayer(
@@ -187,6 +219,130 @@
                             },
                         }
                     )
+
+                    app.setLabelLayer({
+                        url: "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_labels_all.csv",
+                        // offsetPix: [10, 10]	
+                        style: (lb, zf) => {
+                            //select label based on zoom factor
+                            if(zf < 0.025){
+                                return "bold 1em Arial";
+                            }else{
+                                return "bold 0em Arial";
+                            }
+                        },
+                    })
+
+                }
+                if ($(this).attr("id") == "inlineRadio3") {
+                    app.addCSVGridLayer(
+                        //data URL
+                        "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_data_all_no_zeros.csv",
+                        //resolution, in CRS unit
+                        1,
+                        //the styles
+                        [
+                            new gviz.SquareColorWGLStyle({
+                                colorCol: "edition_count",
+                                tFun: (value) => gviz.sExp(Math.min(value * 100 / 1400, 1), -1)
+                            })
+                        ],
+                        {
+                            //tooltip content configuration
+                            cellInfoHTML: c => {
+                                var url = "s3://data.labs.loc.gov/maps/data/sheets_img/" + c.tile_id + "_000_img.tif";
+                                $('#tile_id_text').text(c.tile_id);
+                                $('#link_tiff').attr('href', url);
+                                $('#link_tiff_text').text(url);
+
+                                var url_geo = "s3://data.labs.loc.gov/maps/data/sheets_geo/" + c.tile_id + "_000_geo.tif";
+                                $('#link_geotiff').attr('href', url_geo);
+                                $('#link_geo_tiff_text').text(url_geo);
+
+                                if(c.geo_tiff_count==0){
+                                    // var url_geo = "s3://data.labs.loc.gov/maps/data/sheets_geo/" + c.tile_id + "_000_geo.tif";
+                                    $('#link_geotiff').attr('href', url_geo);
+                                    $('#link_geo_tiff_text').text("No Geo TIFFs available");
+                                }else{
+
+                                    var url_geo = "s3://data.labs.loc.gov/maps/data/sheets_geo/" + c.tile_id + "_000_geo.tif";
+                                    $('#link_geotiff').attr('href', url_geo);
+                                    $('#link_geo_tiff_text').text(url_geo);
+                                    
+                                }
+
+                                return "<b>Tile ID: " + c.tile_id + "</b><br>Edition Count: <b>" + c.edition_count + "</b><br>GeoTiff Count: <b>" + c.geo_tiff_count + "</b>"
+                            },
+                        }
+                    )
+
+                    app.setLabelLayer({
+                        url: "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_labels_all_no_zeros.csv",
+                        // offsetPix: [10, 10]	
+                        style: (lb, zf) => {
+                            //select label based on zoom factor
+                            if(zf < 0.025){
+                                return "bold 1em Arial";
+                            }else{
+                                return "bold 0em Arial";
+                            }
+                        },
+                    })
+                }
+                if ($(this).attr("id") == "inlineRadio4") {
+                    app.addCSVGridLayer(
+                        //data URL
+                        "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_data_all_no_zeros.csv",
+                        //resolution, in CRS unit
+                        1,
+                        //the styles
+                        [
+                            new gviz.SquareColorWGLStyle({
+                                colorCol: "geo_tiff_count",
+                                tFun: (value) => gviz.sExp(Math.min(value * 100 / 1400, 1), -1)
+                            })
+                        ],
+                        {
+                            //tooltip content configuration
+                            cellInfoHTML: c => {
+                                var url = "s3://data.labs.loc.gov/maps/data/sheets_img/" + c.tile_id + "_000_img.tif";
+                                $('#tile_id_text').text(c.tile_id);
+                                $('#link_tiff').attr('href', url);
+                                $('#link_tiff_text').text(url);
+
+                                var url_geo = "s3://data.labs.loc.gov/maps/data/sheets_geo/" + c.tile_id + "_000_geo.tif";
+                                $('#link_geotiff').attr('href', url_geo);
+                                $('#link_geo_tiff_text').text(url_geo);
+
+                                if(c.geo_tiff_count==0){
+                                    // var url_geo = "s3://data.labs.loc.gov/maps/data/sheets_geo/" + c.tile_id + "_000_geo.tif";
+                                    $('#link_geotiff').attr('href', url_geo);
+                                    $('#link_geo_tiff_text').text("No Geo TIFFs available");
+                                }else{
+
+                                    var url_geo = "s3://data.labs.loc.gov/maps/data/sheets_geo/" + c.tile_id + "_000_geo.tif";
+                                    $('#link_geotiff').attr('href', url_geo);
+                                    $('#link_geo_tiff_text').text(url_geo);
+                                    
+                                }
+
+                                return "<b>Tile ID: " + c.tile_id + "</b><br>Edition Count: <b>" + c.edition_count + "</b><br>GeoTiff Count: <b>" + c.geo_tiff_count + "</b>"
+                            },
+                        }
+                    )
+
+                    app.setLabelLayer({
+                        url: "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_labels_all_no_zeros.csv",
+                        // offsetPix: [10, 10]	
+                        style: (lb, zf) => {
+                            //select label based on zoom factor
+                            if(zf < 0.025){
+                                return "bold 1em Arial";
+                            }else{
+                                return "bold 0em Arial";
+                            }
+                        },
+                    })
                 }
             });
         });
