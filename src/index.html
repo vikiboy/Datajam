@@ -3,35 +3,55 @@
 
 <head>
     <meta name="viewport" content="maximum-scale=1.0, user-scalable=no" />
-    <title>Gridviz - example</title>
+    <title>DataJam</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+
 </head>
 
-<body style="margin: 0; height:100%; font-family: Arial, Helvetica, sans-serif; overflow: hidden;">
+<body style="margin: 0; height:100%; font-family: Arial, Helvetica, sans-serif; overflow: hidden;" id="body">
+    <h2 class="text-center mt-4 mb-4">HeatMap - Edition Count</h2>
     <div id="viz-container" style="height:100%; width:100%;"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
+
     <script src="https://unpkg.com/gridviz/build/gridviz.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
 
     <script>
 
         let containerDiv = document.getElementById("viz-container");
 
-        new gviz.App(containerDiv)
+        const app = new gviz.App(containerDiv)
             //set position and zoom
-            .setGeoCenter({ x: 50, y: 50 }).setZoomFactor(3000)
+            .setGeoCenter({ x: 50, y: -50 }).setZoomFactor(0.1)
             //add CSV layer
             .addCSVGridLayer(
                 //data URL
-                "https://photosleuthdatabase.s3.amazonaws.com/basic_grid_data_all.csv",
+                "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_data_all.csv",
                 //resolution, in CRS unit
                 1,
                 //the styles
                 [
                     new gviz.SquareColorWGLStyle({
-                        colorCol: "population",
-                        tFun: (value) => gviz.sExp(Math.min(value, 1), -15)
+                        colorCol: "edition_count",
+                        tFun: (value) => gviz.sExp(Math.min(value * 100 / 1400, 1), -1)
                     })
                 ]
             )
+            .setLabelLayer({
+                url: "https://raw.githubusercontent.com/vikiboy/Datajam/main/data/basic_grid_labels_all.csv",
+                // offsetPix: [10, 10]	
+                style: (lb, zf) => {
+                    //select label based on zoom factor
+                    if(zf < 0.02){
+                        return "bold 1em Arial";
+                    }else{
+                        return "bold 0em Arial";
+                    }
+                },
+            })
 
     </script>
 
